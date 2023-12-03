@@ -1,12 +1,4 @@
-const createGameboard = function () {
-    return {
-        gameboard: [
-            ['', '', ''],
-            ['', '', ''],
-            ['', '', '']
-        ]
-    };
-}();
+ 
 
  
 const player = {
@@ -19,108 +11,107 @@ const bot = {
     turn: false,
 }
 
-function updateGameboard(playerX, playerY, botX, botY){
-     
-    if(!bot.turn){
-        if(createGameboard.gameboard[playerX][playerY] == 'O' 
-        || createGameboard.gameboard[playerX][playerY] == 'X'){
-            console.log('That one is already full');
-            playerTurn();
-        } else {
-            createGameboard.gameboard[playerX][playerY] = player.mark;
-            let id = playerX + playerY;
-            let button = document.getElementById(id);
-            button.innerText = 'X' 
-        }      
-    } else {
-        if(createGameboard.gameboard[botX][botY] == 'O' 
-        || createGameboard.gameboard[botX][botY] == 'X'){
-            console.log('That one is already full');
-            botTurn();
-        } else {
-            createGameboard.gameboard[botX][botY] = bot.mark;
-            let id = botX + botY;
-            let button = document.getElementById(id);
-            console.log(button);
+function updateGameboard(btn, button){
+    if(!player.turn){
+        if(button.innerText != 'X' && button.innerText != 'O'){
             button.innerText = 'O';
+            bot.turn = false;
+        } else if(bot.turn == true) {
+            botTurn();
+            console.log('already taken');
         }
+        
+      
+    } else {
+        if(btn.innerText != 'X' && btn.innerText != 'O'){
+            btn.innerText = 'X';
+        }
+        console.log('already taken');
     }
-    console.log(createGameboard.gameboard);
+
+   
 }
 
 function botTurn() {
     let botX = String(Math.round(Math.random() * 2));
     let botY = String(Math.round(Math.random() * 2));
-    updateGameboard(undefined, undefined, botX, botY);
-   
+    let button = document.getElementById(botX + botY);
+    updateGameboard(undefined, button);
 }
 
-function playerTurn(btns){
-    for (let i = 0; i < 9; i++) {
-        btns[i].addEventListener('click', function () {
-            let playerX = String(btns[i].id.slice(0, 1));
-            let playerY = String(btns[i].id.slice(1, 2));
-            updateGameboard(playerX, playerY);
-            botTurn(); 
-        });
-    }
-   
-}
-
-function winCheck() {
+ 
+function winCheck(buttonsArray) {
+  
     for (let i = 0; i < 3; i++) {
-        if (createGameboard.gameboard[i][0] === createGameboard.gameboard[i][1] && createGameboard.gameboard[i][1] === createGameboard.gameboard[i][2] && createGameboard.gameboard[i][0] !== '') {
-            return createGameboard.gameboard[i][0];
+        const rowStart = i * 3;
+        if (
+            buttonsArray[rowStart].innerText !== '' &&
+            buttonsArray[rowStart].innerText === buttonsArray[rowStart + 1].innerText &&
+            buttonsArray[rowStart].innerText === buttonsArray[rowStart + 2].innerText
+        ) {
+                return buttonsArray[rowStart].innerText;
         }
     }
 
+    // Check columns
     for (let i = 0; i < 3; i++) {
-        if (createGameboard.gameboard[0][i] === createGameboard.gameboard[1][i] && createGameboard.gameboard[1][i] === createGameboard.gameboard[2][i] && createGameboard.gameboard[0][i] !== '') {
-            return createGameboard.gameboard[0][i];
+        if (
+            buttonsArray[i].innerText !== '' &&
+            buttonsArray[i].innerText === buttonsArray[i + 3].innerText &&
+            buttonsArray[i].innerText === buttonsArray[i + 6].innerText
+        ) {
+                return buttonsArray[i].innerText;
         }
     }
 
-    if (createGameboard.gameboard[0][0] === createGameboard.gameboard[1][1] && createGameboard.gameboard[1][1] === createGameboard.gameboard[2][2] && createGameboard.gameboard[0][0] !== '') {
-        return createGameboard.gameboard[0][0];
+    // Check diagonals
+    if (
+        buttonsArray[0].innerText !== '' &&
+        buttonsArray[0].innerText === buttonsArray[4].innerText &&
+        buttonsArray[0].innerText === buttonsArray[8].innerText
+    ) {
+        return buttonsArray[0].innerText;
     }
 
-    if (createGameboard.gameboard[0][2] === createGameboard.gameboard[1][1] && createGameboard.gameboard[1][1] === createGameboard.gameboard[2][0] && createGameboard.gameboard[0][2] !== '') {
-        return createGameboard.gameboard[0][2];
-    }
+    if (
+        buttonsArray[2].innerText !== '' &&
+        buttonsArray[2].innerText === buttonsArray[4].innerText &&
+        buttonsArray[2].innerText === buttonsArray[6].innerText
+    ) {
+        return buttonsArray[2].innerText }
 
     return null;
 }
 
-function play (){
-    let btns = document.querySelectorAll('button');
-    const winnerdiv = document.querySelector('.winner');
-    let movement = 0;
-    while(true){
-        if(!player.turn){
-            console.log('Bot\'s turn');
-            botTurn();
-            player.turn = true;
-            bot.turn = false;
-        } else { 
-            console.log('Player\'s turn');
-            playerTurn(btns);
-            bot.turn = true;
-            player.turn = false;
-        }
 
-        movement++;
-        if (movement >= 5) {
-            const winner = winCheck();
-            if (winner) {
-                winnerdiv.innerText = `${winner} is the winner`;
-                break;
-            } else if (movement === 9) {
-                console.log('It\'s a tie!');
-                break;
+function play() {
+    let btns = document.querySelectorAll('button');
+    const buttonsArray = Array.from(btns);
+    let winnerDiv = document.querySelector('.winner');
+
+    buttonsArray.forEach(btn => {
+        btn.addEventListener('click', () => {
+            if (player.turn) {
+                updateGameboard(btn);
+                player.turn = false;
+                bot.turn = true;
+                
             }
-        }
-    }
+
+            if (bot.turn) {
+                botTurn();
+               
+                player.turn = true;
+            }
+            win = winCheck(buttonsArray);
+            if(win){
+                winnerDiv.innerHTML = `the winner was ${win}`;
+            }
+             
+
+        });
+    });
 }
 
 play();
-
+ 
