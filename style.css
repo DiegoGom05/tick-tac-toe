@@ -1,0 +1,32 @@
+body {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+
+.container {
+    display: grid;
+    grid-template-columns: 1fr, 1fr, 1fr;
+    grid-template-rows: 1fr, 1fr, 1fr;
+
+    height: 100px;
+    width: 500px;
+    
+    gap: 16px;
+}
+
+.row {
+     
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 32px
+}
+
+button {
+    height: 100px;
+    width: 100px;
+    font-size:24px ;
+}
